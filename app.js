@@ -10,39 +10,41 @@ app.use(cookieParser());
 app.use(express.static('public'));
 app.use(express.json());
 
-const users = {};
+const users = {}; // In-memory user storage
 
+// Serve the main page
 app.get('/', (req, res) => {
-    if (req.cookies.username && req.cookies.password) {
-        res.sendFile(__dirname + '/index.html');
+    if (req.cookies.username) {
+        res.sendFile(__dirname + '/public/index.html');
     } else {
-        res.sendFile(__dirname + '/login.html');
+        res.sendFile(__dirname + '/public/login.html');
     }
 });
 
+// Serve registration page
 app.get('/register-page', (req, res) => {
-    res.sendFile(__dirname + '/register.html');
+    res.sendFile(__dirname + '/public/register.html');
 });
 
+// Serve password setting page
 app.get('/password', (req, res) => {
-    res.sendFile(__dirname + '/password.html');
+    res.sendFile(__dirname + '/public/password.html');
 });
 
+// Handle user registration
 app.post('/register', (req, res) => {
     const { username } = req.body;
     const hash = bcrypt.hashSync(username, 10);
-    users[hash] = { username, expiresAt: Date.now() + 600000};
+    users[hash] = { username, expiresAt: Date.now() + 600000 };
     QRCode.toDataURL(`http://localhost:8080/password?user=${hash}`, (err, url) => {
-        console.log(`http://localhost:8080/password?user=${hash}`);
         if (err) throw err;
-        res.send(`<img src="${url}">`);
+        res.send(`<img src="${url}" alt="QR Code for password entry">`);
     });
 });
 
+// Handle password submission
 app.post('/submit-password', (req, res) => {
     const { password, userHash } = req.body;
-    console.log(users[userHash]);
-    console.log(userHash);
 
     if (users[userHash] && Date.now() < users[userHash].expiresAt) {
         const username = users[userHash].username;
@@ -50,25 +52,39 @@ app.post('/submit-password', (req, res) => {
         users[username] = { username, password: hashedPassword };
         fs.appendFileSync('users.txt', `${username}:${hashedPassword}\n`);
         res.cookie('username', username);
-        res.cookie('password', hashedPassword);
         res.redirect('/');
     } else {
         res.status(400).send('QR code expired or invalid');
     }
 });
 
+// Handle user login
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     const userData = users[username];
+
     if (userData && bcrypt.compareSync(password, userData.password)) {
         res.cookie('username', username);
-        res.cookie('password', userData.password);
-        res.redirect('/index.html');
+        res.redirect('/');
     } else {
         res.status(400).send('Invalid login');
     }
 });
 
+// Handle making coffee
+app.post('/make-coffee', (req, res) => {
+    const { username } = req.body;
+
+    if (req.cookies.username) {
+        // Increase coffee count (store in users object for demo)
+        users[username].coffee_count = (users[username].coffee_count || 0) + 1;
+        res.send({ message: 'Káva byla uvařena!', coffee_count: users[username].coffee_count });
+    } else {
+        res.status(403).send('Unauthorized');
+    }
+});
+
+// Server listening
 app.listen(8080, () => {
-    console.log('listening on port http://localhost:8080');
+    console.log('Server listening on http://localhost:8080');
 });
