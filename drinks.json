@@ -1,0 +1,6 @@
+[
+    { "ID": 1, "typ": "Espresso" },
+    { "ID": 2, "typ": "Latte" },
+    { "ID": 3, "typ": "Cappuccino" },
+    { "ID": 4, "typ": "Americano" }
+]

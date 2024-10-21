@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evidenční systém vypité kávy</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            margin: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+        }
+
+        .slider-label {
+            margin-top: 10px;
+        }
+
+        .tab-content {
+            margin-top: 20px;
+        }
+
+        .tab {
+            display: none;
+        }
+
+        .tab.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Evidujte vypité nápoje</h2>
+
+        <!-- Tab buttons -->
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" id="orderTabLink">Nová Objednávka</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" id="historyTabLink">Historie Objednávek</a>
+            </li>
+        </ul>
+
+        <!-- Order Form Tab -->
+        <div id="orderTab" class="tab active tab-content">
+            <form id="coffeeForm">
+                <div class="form-group">
+                    <label for="name">Jméno:</label>
+                    <select class="form-control" id="name" required></select>
+                </div>
+                <div id="drinkInputs"></div>
+                <button type="submit" class="btn btn-primary">Odeslat</button>
+            </form>
+        </div>
+
+        <!-- Order History Tab -->
+        <div id="historyTab" class="tab tab-content">
+            <h3>Historie Objednávek</h3>
+            <div id="orderHistory"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            loadPeopleAndDrinks();
+            document.getElementById('coffeeForm').addEventListener('submit', handleFormSubmit);
+            document.getElementById('orderTabLink').addEventListener('click', showOrderForm);
+            document.getElementById('historyTabLink').addEventListener('click', showOrderHistory);
+        });
+
+        function loadPeopleAndDrinks() {
+            // Load people from JSON
+            fetch('/getPeopleList')
+                .then(response => response.json())
+                .then(data => {
+                    let peopleSelect = document.getElementById('name');
+                    peopleSelect.innerHTML = '';
+                    data.forEach(person => {
+                        let option = document.createElement('option');
+                        option.value = person.ID;
+                        option.text = person.name;
+                        peopleSelect.add(option);
+                    });
+                })
+                .catch(error => console.error('Error loading people:', error));
+
+            // Load coffee types from JSON
+            fetch('/getTypesList')
+                .then(response => response.json())
+                .then(data => {
+                    let drinkInputsDiv = document.getElementById('drinkInputs');
+                    drinkInputsDiv.innerHTML = '';
+                    data.forEach(drink => {
+                        let drinkDiv = document.createElement('div');
+                        drinkDiv.classList.add('form-group');
+
+                        let label = document.createElement('label');
+                        label.textContent = `Množství (v ks) pro ${drink.typ}:`;
+
+                        let slider = document.createElement('input');
+                        slider.type = 'range';
+                        slider.classList.add('form-control-range');
+                        slider.id = `drink_${drink.ID}`;
+                        slider.name = `${drink.typ}`;
+                        slider.min = 0;
+                        slider.max = 10;
+                        slider.value = 0;
+                        slider.step = 1;
+
+                        let sliderValue = document.createElement('span');
+                        sliderValue.classList.add('slider-label');
+                        sliderValue.textContent = `0 ks`;
+
+                        slider.addEventListener('input', function () {
+                            sliderValue.textContent = `${slider.value} ks`;
+                        });
+
+                        drinkDiv.appendChild(label);
+                        drinkDiv.appendChild(slider);
+                        drinkDiv.appendChild(sliderValue);
+                        drinkInputsDiv.appendChild(drinkDiv);
+                    });
+                })
+                .catch(error => console.error('Error loading drinks:', error));
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const drinkQuantities = {};
+
+            document.querySelectorAll('[id^="drink_"]').forEach(slider => {
+                const drinkName = slider.name;
+                drinkQuantities[drinkName] = slider.value;
+            });
+
+            fetch('/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: name, drinkQuantities })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('Objednávka úspěšně odeslána!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Chyba při odesílání objednávky.');
+                });
+        }
+
+        function showOrderForm() {
+            document.getElementById('orderTab').classList.add('active');
+            document.getElementById('historyTab').classList.remove('active');
+        }
+
+        function showOrderHistory() {
+    document.getElementById('orderTab').classList.remove('active');
+    document.getElementById('historyTab').classList.add('active');
+
+    // Load order history from JSON
+    fetch('/orders')
+        .then(response => response.json())
+        .then(data => {
+            let orderHistoryDiv = document.getElementById('orderHistory');
+            orderHistoryDiv.innerHTML = '';
+
+            if (data.length === 0) {
+                orderHistoryDiv.innerHTML = '<p>Žádné objednávky nebyly nalezeny.</p>';
+            } else {
+                data.forEach(order => {
+                    let drinkDetails = '';
+                    for (let drink in order.drinkQuantities) {
+                        if (order.drinkQuantities[drink] > 0) {
+                            drinkDetails += `<li>${drink}: ${order.drinkQuantities[drink]} ks</li>`;
+                        }
+                    }
+
+                    let orderItem = document.createElement('div');
+                    orderItem.innerHTML = `
+                        <strong>${order.username}</strong> objednal:
+                        <ul>${drinkDetails}</ul>
+                        <p><em>dne ${new Date(order.date).toLocaleString()}</em></p>
+                    `;
+                    orderHistoryDiv.appendChild(orderItem);
+                });
+            }
+        })
+        .catch(error => console.error('Error loading order history:', error));
+}
+
+    </script>
+</body>
+
+</html>

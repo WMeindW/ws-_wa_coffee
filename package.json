@@ -1,0 +1,22 @@
+{
+  "name": "wa_kava",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "cros": "^1.0.1",
+    "experss": "^0.0.1-security",
+    "express": "^4.21.1",
+    "fs": "^0.0.1-security",
+    "qrcode": "^1.5.4"
+  }
+}

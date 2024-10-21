@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #qr-code {
+            margin-top: 20px;
+        }
+        #qr-code-text {
+            display: none;
+        }
+        .alert {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Register</h1>
+    <form id="registerForm" action="/register" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <div id="usernameFeedback" class="alert"></div> <!-- Feedback for username availability -->
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="qr-code" style="display:none;"></div>
+    <p id="qr-code-text" style="display:none;">Scan this QR code to proceed to set your password</p>
+    <div id="formFeedback" class="alert"></div> <!-- General feedback for form submission -->
+</div>
+
+<script>
+    const usernameInput = document.getElementById('username');
+    const usernameFeedback = document.getElementById('usernameFeedback');
+    const formFeedback = document.getElementById('formFeedback');
+
+    // Check username availability on input
+    usernameInput.addEventListener('input', async () => {
+        const username = usernameInput.value;
+        
+        if (username.length > 0) {
+            const response = await fetch(`/check-username?username=${username}`);
+            const isTaken = await response.text();
+            
+            if (isTaken === 'true') {
+                usernameFeedback.textContent = 'Username is already taken.';
+            } else {
+                usernameFeedback.textContent = ''; // Clear feedback if username is available
+            }
+        } else {
+            usernameFeedback.textContent = ''; // Clear feedback if input is empty
+        }
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault(); // Prevent form submission
+        const username = usernameInput.value;
+
+        // Check final availability before submission
+        const finalCheckResponse = await fetch(`/check-username?username=${username}`);
+        const finalCheck = await finalCheckResponse.text();
+
+        if (finalCheck === 'true') {
+            usernameFeedback.textContent = 'Username is already taken. Please choose another one.';
+            return;
+        }
+
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username: username })
+        });
+
+        if (response.ok) {
+            const result = await response.text();
+            const qrCodeData = result.match(/<img src="(.*?)" alt="QR Code">/);
+
+            if (qrCodeData) {
+                document.getElementById('qr-code').innerHTML = `<img src="${qrCodeData[1]}" alt="QR Code">`;
+                document.getElementById('qr-code').style.display = 'block';
+                document.getElementById('qr-code-text').style.display = 'block';
+            }
+        } else {
+            const errorText = await response.text();
+            formFeedback.textContent = `Error: ${errorText}`; // Show error message
+            formFeedback.className = 'alert'; // Reset to alert class
+        }
+    });
+</script>
+</body>
+</html>
