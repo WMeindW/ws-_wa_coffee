@@ -174,25 +174,29 @@
             orderHistoryDiv.innerHTML = '';
 
             if (data.length === 0) {
-                orderHistoryDiv.innerHTML = '<p>Žádné objednávky nebyly nalezeny.</p>';
-            } else {
-                data.forEach(order => {
-                    let drinkDetails = '';
-                    for (let drink in order.drinkQuantities) {
-                        if (order.drinkQuantities[drink] > 0) {
-                            drinkDetails += `<li>${drink}: ${order.drinkQuantities[drink]} ks</li>`;
-                        }
-                    }
-
-                    let orderItem = document.createElement('div');
-                    orderItem.innerHTML = `
-                        <strong>${order.username}</strong> objednal:
-                        <ul>${drinkDetails}</ul>
-                        <p><em>dne ${new Date(order.date).toLocaleString()}</em></p>
-                    `;
-                    orderHistoryDiv.appendChild(orderItem);
-                });
+    orderHistoryDiv.innerHTML = '<p>Žádné objednávky nebyly nalezeny.</p>';
+    console.log('<p>Žádné objednávky nebyly nalezeny.</p>')
+} else {
+    data.forEach(order => {
+        let drinkDetails = '';
+        for (let drink in order.drinkQuantities) {
+            if (order.drinkQuantities[drink] > 0) {
+                drinkDetails += `<li>${drink}: ${order.drinkQuantities[drink]} ks</li>`;
             }
+        }
+
+        let orderItem = document.createElement('div');
+        orderItem.innerHTML = `
+            <strong>${order.username}</strong> objednal:
+            <ul>${drinkDetails}</ul>
+            <p><em>dne ${new Date(order.date).toLocaleString()}</em></p>
+        `;
+        orderHistoryDiv.appendChild(orderItem);
+
+        console.log(JSON.stringify(order));
+    });
+}
+
         })
         .catch(error => console.error('Error loading order history:', error));
 }
