@@ -17,13 +17,15 @@ const users = {}; // In-memory user storage
 
 // Load users from file
 function loadUsers() {
-    if (fs.existsSync('users.txt')) {
-        const data = fs.readFileSync('users.txt', 'utf8').split('\n');
-        data.forEach(line => {
-            if (line) {
-                const [username, hashedPassword] = line.split(':');
-                users[username] = { username, password: hashedPassword };
-            }
+    const filePath = path.join(__dirname, 'users.json');
+
+    if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, 'utf8');
+        const usersArray = JSON.parse(data);
+
+        usersArray.forEach(user => {
+            const { username, password } = user;
+            users[username] = { username, password }; // Store in users object
         });
     }
 }
@@ -67,9 +69,25 @@ app.get('/password', (req, res) => {
 });
 
 // Handle user registration
+// Handle user registration
 app.post('/register', (req, res) => {
     const { username } = req.body;
     const hash = bcrypt.hashSync(username, 10);
+
+    // Check if username already exists
+    const filePath = path.join(__dirname, 'users.json');
+    let existingUsers = [];
+
+    if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, 'utf8');
+        existingUsers = JSON.parse(data);
+    }
+
+    // Prevent duplicate usernames
+    const userExists = existingUsers.some(user => user.username === username);
+    if (userExists) {
+        return res.status(400).send('Username already exists. Please choose a different username.');
+    }
 
     // Store the user with a temporary expiration time
     users[hash] = { username, expiresAt: Date.now() + 600000 }; // QR code valid for 10 minutes
@@ -86,22 +104,45 @@ app.post('/register', (req, res) => {
 });
 
 // Handle password submission
+// Handle password submission
 app.post('/submit-password', (req, res) => {
     const { password, userHash } = req.body;
 
+    // Check if the user exists and if the QR code is valid
     if (users[userHash] && Date.now() < users[userHash].expiresAt) {
         const username = users[userHash].username;
         const hashedPassword = bcrypt.hashSync(password, 10);
-        users[username] = { username, password: hashedPassword };
+        
+        // Load existing users from users.json
+        const filePath = path.join(__dirname, 'users.json');
+        let existingUsers = [];
 
-        // Store the user in the users.txt file
-        fs.appendFileSync('users.txt', `${username}:${hashedPassword}\n`);
-        res.cookie('username', username);
-        res.redirect('/coffee_order'); // Redirect to the coffee order page
+        if (fs.existsSync(filePath)) {
+            const data = fs.readFileSync(filePath, 'utf8');
+            existingUsers = JSON.parse(data);
+        }
+
+        // Check if the user already exists
+        const userExists = existingUsers.some(user => user.username === username);
+
+        if (userExists) {
+            return res.status(400).send('Username already exists. Please choose a different username.'); // Prevent duplicate usernames
+        } else {
+            // Add the new user to the array
+            existingUsers.push({ username, password: hashedPassword });
+
+            // Write back to users.json
+            fs.writeFileSync(filePath, JSON.stringify(existingUsers, null, 2));
+            
+            // Set cookie and redirect
+            res.cookie('username', username);
+            res.redirect('/coffee_order'); // Redirect to the coffee order page
+        }
     } else {
         res.status(400).send('QR code expired or invalid');
     }
 });
+
 
 // Serve coffee order page
 app.get('/coffee_order', (req, res) => {

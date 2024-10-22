@@ -3,110 +3,44 @@
     "id": 1,
     "username": "krasa",
     "drinkQuantities": {
-      "Espresso": "2",
-      "Latte": "0",
-      "Cappuccino": "0",
-      "Americano": "0"
+      "1": "2",
+      "2": "0",
+      "3": "1",
+      "4": "0"
     },
-    "date": "2024-10-21T18:19:11.072Z"
+    "date": "2024-10-22T10:36:49.189Z"
   },
   {
     "id": 2,
-    "username": "krasa",
+    "username": "tada",
     "drinkQuantities": {
-      "Espresso": "2",
-      "Latte": "0",
-      "Cappuccino": "0",
-      "Americano": "0"
+      "1": "2",
+      "2": "0",
+      "3": "0",
+      "4": "0"
     },
-    "date": "2024-10-21T18:20:28.370Z"
+    "date": "2024-10-22T10:43:56.474Z"
   },
   {
     "id": 3,
-    "username": "krasa",
+    "username": "tada",
     "drinkQuantities": {
-      "Espresso": "2",
-      "Latte": "0",
-      "Cappuccino": "0",
-      "Americano": "0"
+      "1": "6",
+      "2": "0",
+      "3": "0",
+      "4": "0"
     },
-    "date": "2024-10-21T18:20:35.002Z"
+    "date": "2024-10-22T10:44:56.819Z"
   },
   {
     "id": 4,
-    "username": "krasa",
+    "username": "tadeas",
     "drinkQuantities": {
-      "Espresso": "1",
-      "Latte": "0",
-      "Cappuccino": "0",
-      "Americano": "0"
+      "1": "1",
+      "2": "0",
+      "3": "2",
+      "4": "0"
     },
-    "date": "2024-10-21T18:20:42.053Z"
-  },
-  {
-    "id": 5,
-    "username": "krasa",
-    "drinkQuantities": {
-      "Espresso": "2",
-      "Latte": "1",
-      "Cappuccino": "0",
-      "Americano": "0"
-    },
-    "date": "2024-10-21T18:26:00.233Z"
-  },
-  {
-    "id": 6,
-    "username": "krasa",
-    "drinkQuantities": {
-      "Espresso": "3",
-      "Latte": "1",
-      "Cappuccino": "0",
-      "Americano": "0"
-    },
-    "date": "2024-10-21T18:47:20.148Z"
-  },
-  {
-    "id": 7,
-    "username": "krasa",
-    "drinkQuantities": {
-      "Espresso": "3",
-      "Latte": "1",
-      "Cappuccino": "0",
-      "Americano": "3"
-    },
-    "date": "2024-10-21T18:47:23.636Z"
-  },
-  {
-    "id": 8,
-    "username": "krasa",
-    "drinkQuantities": {
-      "Espresso": "1",
-      "Latte": "1",
-      "Cappuccino": "3",
-      "Americano": "3"
-    },
-    "date": "2024-10-21T18:47:48.727Z"
-  },
-  {
-    "id": 9,
-    "username": "krasa",
-    "drinkQuantities": {
-      "Espresso": "0",
-      "Latte": "0",
-      "Cappuccino": "1",
-      "Americano": "2"
-    },
-    "date": "2024-10-21T18:48:54.762Z"
-  },
-  {
-    "id": 10,
-    "username": "krasa",
-    "drinkQuantities": {
-      "Espresso": "0",
-      "Latte": "10",
-      "Cappuccino": "0",
-      "Americano": "0"
-    },
-    "date": "2024-10-21T18:53:18.334Z"
+    "date": "2024-10-22T10:56:25.947Z"
   }
 ]
