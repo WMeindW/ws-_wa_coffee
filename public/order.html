@@ -86,7 +86,7 @@
           .addEventListener("click", showOrderHistory);
       });
 
-      let drinkMapping = {}; // Global variable to store drink ID to name mapping
+      let drinkMapping = {};
 
       function loadPeopleAndDrinks() {
         fetch("/getPeopleList")
@@ -109,7 +109,7 @@
             let drinkInputsDiv = document.getElementById("drinkInputs");
             drinkInputsDiv.innerHTML = "";
             data.forEach((drink) => {
-              drinkMapping[drink.ID] = drink.typ; // Store the drink name by its ID
+              drinkMapping[drink.ID] = drink.typ;
 
               let drinkDiv = document.createElement("div");
               drinkDiv.classList.add("form-group");
@@ -123,7 +123,7 @@
               slider.id = `${drink.ID}`;
               slider.name = `${drink.typ}`;
               slider.min = 0;
-              slider.max = 10;
+              slider.max = drink.count > 10 ? 10 : drink.count;
               slider.value = 0;
               slider.step = 1;
 
@@ -147,11 +147,17 @@
       function handleFormSubmit(event) {
         event.preventDefault();
         const name = document.getElementById("name").value;
-        const drinkQuantities = {};
+        const drinkQuantities = [];
 
         document.querySelectorAll('input[type="range"]').forEach((slider) => {
-          const drinkID = slider.id; // Use the drink ID here
-          drinkQuantities[drinkID] = slider.value;
+          const drinkID = slider.id;
+          const count = parseInt(slider.value);
+          if (count > 0) {
+            drinkQuantities.push({
+              ID: parseInt(drinkID),
+              count: count,
+            });
+          }
         });
 
         const orderData = { username: name, drinkQuantities };
@@ -172,7 +178,6 @@
             alert("Chyba při odesílání objednávky.");
           });
 
-        // Log the JSON with drink IDs
         console.log(JSON.stringify(orderData));
       }
 
@@ -194,28 +199,37 @@
             if (data.length === 0) {
               orderHistoryDiv.innerHTML =
                 "<p>Žádné objednávky nebyly nalezeny.</p>";
-              console.log(
-                JSON.stringify({ message: "Žádné objednávky nebyly nalezeny." })
-              );
             } else {
               data.forEach((order) => {
                 let drinkDetails = "";
-                for (let drinkID in order.drinkQuantities) {
-                  if (order.drinkQuantities[drinkID] > 0) {
-                    let drinkName = drinkMapping[drinkID]; // Get drink name from the mapping
-                    drinkDetails += `<li>${drinkName}: ${order.drinkQuantities[drinkID]} ks</li>`;
+
+                if (Array.isArray(order.drinkQuantities)) {
+                  order.drinkQuantities.forEach((drink) => {
+                    if (drink.count > 0) {
+                      let drinkName = drinkMapping[drink.ID];
+                      drinkDetails += `<li>${drinkName}: ${drink.count} ks</li>`;
+                    }
+                  });
+                } else {
+                  for (let drinkID in order.drinkQuantities) {
+                    if (order.drinkQuantities[drinkID] > 0) {
+                      let drinkName = drinkMapping[drinkID];
+                      drinkDetails += `<li>${drinkName}: ${order.drinkQuantities[drinkID]} ks</li>`;
+                    }
                   }
                 }
 
-                let orderItem = document.createElement("div");
-                orderItem.innerHTML = `
-            <strong>${order.username}</strong> objednal:
-            <ul>${drinkDetails}</ul>
-            <p><em>dne ${new Date(order.date).toLocaleString()}</em></p>
-          `;
-                orderHistoryDiv.appendChild(orderItem);
-
-                console.log(JSON.stringify(order));
+                if (drinkDetails) {
+                  let orderItem = document.createElement("div");
+                  orderItem.innerHTML = `
+                            <strong>${order.username}</strong> objednal:
+                            <ul>${drinkDetails}</ul>
+                            <p><em>dne ${new Date(
+                              order.date
+                            ).toLocaleString()}</em></p>
+                        `;
+                  orderHistoryDiv.appendChild(orderItem);
+                }
               });
             }
           })
