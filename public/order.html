@@ -89,7 +89,7 @@
       let drinkMapping = {};
 
       function loadPeopleAndDrinks() {
-        fetch("/getPeopleList")
+        fetch("getPeopleList")
           .then((response) => response.json())
           .then((data) => {
             let peopleSelect = document.getElementById("name");
@@ -103,7 +103,7 @@
           })
           .catch((error) => console.error("Error loading people:", error));
 
-        fetch("/getTypesList")
+        fetch("getTypesList")
           .then((response) => response.json())
           .then((data) => {
             let drinkInputsDiv = document.getElementById("drinkInputs");
@@ -162,7 +162,7 @@
 
         const orderData = { username: name, drinkQuantities };
 
-        fetch("/orders", {
+        fetch("orders", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -190,7 +190,7 @@
         document.getElementById("orderTab").classList.remove("active");
         document.getElementById("historyTab").classList.add("active");
 
-        fetch("/orders")
+        fetch("orders")
           .then((response) => response.json())
           .then((data) => {
             let orderHistoryDiv = document.getElementById("orderHistory");

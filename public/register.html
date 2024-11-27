@@ -111,7 +111,7 @@
         const username = usernameInput.value;
 
         // Check final availability before submission
-        const finalCheckResponse = await fetch(`/check-username?username=${username}`);
+        const finalCheckResponse = await fetch(`check-username?username=${username}`);
         const finalCheck = await finalCheckResponse.text();
 
         if (finalCheck === 'true') {
