@@ -93,7 +93,7 @@
         const username = usernameInput.value;
         
         if (username.length > 0) {
-            const response = await fetch(`/check-username?username=${username}`);
+            const response = await fetch(`check-username?username=${username}`);
             const isTaken = await response.text();
             
             if (isTaken === 'true') {
@@ -119,7 +119,7 @@
             return;
         }
 
-        const response = await fetch('/register', {
+        const response = await fetch('register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
