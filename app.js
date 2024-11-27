@@ -241,7 +241,9 @@ app.post('/orders', (req, res) => {
 
 // Load drinks from JSON file
 app.get('/getTypesList', (req, res) => {
-    fs.readFile('drinks.json', 'utf8', (err, data) => {
+    const filePath = path.join(__dirname, 'drinks.json');
+    console.log('Loading drinks from:', filePath);
+    fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading drink types:', err);
             return res.status(500).json({ error: 'Error reading drink types' });
