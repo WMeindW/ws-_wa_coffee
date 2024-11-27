@@ -232,7 +232,7 @@ app.post('/orders', (req, res) => {
     orders.push(newOrder);
 
     try {
-        fs.writeFileSync('orders.json', JSON.stringify(orders, null, 2));
+        fs.writeFileSync(path.join(__dirname, 'orders.json'), JSON.stringify(orders, null, 2));
     } catch (writeError) {
         console.error('Error writing orders to file:', writeError);
         return res.status(500).json({ error: 'Error saving order.' });
