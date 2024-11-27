@@ -105,7 +105,7 @@ app.post('/register', (req, res) => {
     users[hash] = { username, expiresAt: Date.now() + 600000 };
     console.log('User registered, generating QR code');
 
-    QRCode.toDataURL(`http://http://141.144.241.160/kafe/password?user=${hash}`, (err, url) => {
+    QRCode.toDataURL(`http://141.144.241.160/kafe/password?user=${hash}`, (err, url) => {
         if (err) throw err;
         res.send(`
             <h1>Registration Successful</h1>
