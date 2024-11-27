@@ -47,8 +47,10 @@ function loadCoffeeTypes() {
 
 // Load orders from file
 function loadOrders() {
-    if (fs.existsSync('orders.json')) {
-        const orders = JSON.parse(fs.readFileSync('orders.json', 'utf8'));
+    const filePath = path.join(__dirname, 'orders.json');
+    console.log('Saving drinks to:', filePath);
+    if (fs.existsSync(filePath)) {
+        const orders = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         console.log('Orders loaded:', orders);
         return orders;
     }
