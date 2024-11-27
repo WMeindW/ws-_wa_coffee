@@ -142,7 +142,7 @@ app.post('/submit-password', (req, res) => {
             fs.writeFileSync(filePath, JSON.stringify(existingUsers, null, 2));
             console.log(`Password set for user: ${username}`);
             res.cookie('username', username);
-            res.redirect('/coffee_order');
+            res.redirect('coffee_order');
         }
     } else {
         console.warn('QR code expired or invalid for user:', userHash);
