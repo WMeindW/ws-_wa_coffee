@@ -166,7 +166,7 @@ app.post('/login', (req, res) => {
     if (userData && bcrypt.compareSync(password, userData.password)) {
         console.log(`Login successful for user: ${username}`);
         res.cookie('username', username);
-        res.redirect('/coffee_order');
+        res.redirect('coffee_order');
     } else {
         console.warn('Invalid login attempt for user:', username);
         res.status(400).send('Invalid login');
