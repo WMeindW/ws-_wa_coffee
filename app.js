@@ -15,7 +15,6 @@ app.use(express.static('public'));
 
 const users = {};
 
-// Load users from file
 function loadUsers() {
     const filePath = path.join(__dirname, 'users.json');
     console.log('Loading users from:', filePath);
@@ -112,7 +111,7 @@ app.post('/register', (req, res) => {
     users[hash] = { username, expiresAt: Date.now() + 600000 };
     console.log('User registered, generating QR code');
 
-    QRCode.toDataURL(`http://141.144.241.160/kafe/password?user=${hash}`, (err, url) => {
+    QRCode.toDataURL(`http://http://141.144.235.158/kafe/password?user=${hash}`, (err, url) => {
         if (err) throw err;
         res.send(`
             <h1>Registration Successful</h1>
@@ -186,19 +185,53 @@ app.get('/coffee-types', (req, res) => {
     res.json(coffeeTypes);
 });
 
-// Add a new coffee type
-// app.post('/coffee-types', (req, res) => {
-//     const { name, description, count } = req.body;
-//     console.log(`Adding new coffee type: ${name}, Description: ${description}, Count: ${count}`);
+app.post('/coffee-types', (req, res) => {
+    const { name, description, count, drinkId } = req.body;
+    console.log(`Adding new coffee type: ${name}, Description: ${description}, Count: ${count}, Drink ID: ${drinkId}`);
 
-//     const coffeeTypes = loadCoffeeTypes();
-//     const newCoffee = { id: coffeeTypes.length + 1, name, description, count };
+    // Načíst seznam druhů kávy
+    const coffeeTypes = loadCoffeeTypes();
+    const newCoffee = { id: coffeeTypes.length + 1, name, description, count };
 
-//     coffeeTypes.push(newCoffee);
-//     fs.writeFileSync('coffee_types.json', JSON.stringify(coffeeTypes, null, 2));
-//     console.log('New coffee type added:', newCoffee);
-//     res.status(201).json(newCoffee);
-// });
+    // Přidat nový typ kávy
+    coffeeTypes.push(newCoffee);
+
+    try {
+        // Uložit nový seznam kávy
+        fs.writeFileSync('coffee_types.json', JSON.stringify(coffeeTypes, null, 2));
+        console.log('New coffee type added:', newCoffee);
+    } catch (writeError) {
+        console.error('Error writing coffee types to file:', writeError);
+        return res.status(500).json({ error: 'Error saving coffee type.' });
+    }
+
+    // Načíst seznam drinků
+    if (fs.existsSync('drinks.json')) {
+        const drinks = JSON.parse(fs.readFileSync('drinks.json', 'utf8'));
+
+        // Najít drink podle ID a odečíst množství
+        const drink = drinks.find(d => d.id === drinkId);
+        if (drink) {
+            drink.count = Math.max(0, drink.count - count); // Odečíst množství, minimálně na 0
+            console.log(`Updated drink count for drink ID ${drinkId}:`, drink);
+
+            try {
+                // Uložit aktualizovaný seznam drinků
+                fs.writeFileSync('drinks.json', JSON.stringify(drinks, null, 2));
+            } catch (writeError) {
+                console.error('Error writing drinks to file:', writeError);
+                return res.status(500).json({ error: 'Error updating drink count.' });
+            }
+        } else {
+            console.warn(`Drink ID ${drinkId} not found in drinks.json.`);
+        }
+    } else {
+        console.warn('drinks.json file does not exist.');
+    }
+
+    res.status(201).json(newCoffee);
+});
+
 
 // Orders management
 app.get('/orders', (req, res) => {
