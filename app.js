@@ -58,6 +58,11 @@ function loadOrders() {
     return [];
 }
 
+app.get('/', (req, res) => {
+    console.log('Serving index page');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Serve registration page
 app.get('/register-page', (req, res) => {
     console.log('Serving registration page');
